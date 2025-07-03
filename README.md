@@ -6,6 +6,8 @@
 ## 🎥 Demo Video  
 [![Watch the Bloq Quantum Circuit Builder Demo](https://img.youtube.com/vi/psCZBLrHhZ8/0.jpg)](https://youtu.be/psCZBLrHhZ8)
 
+*Click the thumbnail above to watch the Quantum Circuit Builder demo video.*
+
 ## 🧠 About the Task
 
 This project is my solution to the Bloq Quantum Full Stack Screening Task.
