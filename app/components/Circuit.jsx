@@ -118,14 +118,23 @@ const onDrop = (newLayout, layoutItem, event) => {
         
         const rowsOverlap = newGateRows.some(row => existingGateRows.includes(row));
         
-        if (!rowsOverlap) return false;
+        const withinWidth =
+                layoutItem.x >= existingGate.x &&
+                layoutItem.x <  existingGate.x + existingGate.w;
+        
+
+            if (rowsOverlap && withinWidth) return true;
+        
+
+            if (!rowsOverlap && existingGate.w > 1 &&       
+                layoutItem.x > existingGate.x &&            
+                layoutItem.x < existingGate.x + existingGate.w) {
+                return true;
+            }
+        
+            return false;
         
         
-        const existingGateWidth = existingGate.w;
-        
-        
-        return layoutItem.x >= existingGate.x && 
-               layoutItem.x < existingGate.x + existingGateWidth;
     });
     
     if (hasCollision) {
@@ -160,23 +169,43 @@ const onDrop = (newLayout, layoutItem, event) => {
     return;
 };
 
-    
-    const handleDragStop = (newLayout) => {
-        if (!draggedItemId) {
-            console.error('Dragged item ID is missing on drag stop!');
-            return;
-        }
-        const updatedLayout = newLayout.filter(
-            item => item.i !== '__dropping-elem__' && item.y < gridDimenY,
-        ).map(item => {
-            return {
-                ...item,
-                gateId: layout.find(i => i.i === item.i)?.gateId,
-            };
-        });
-        setLayout(updatedLayout);
-        setDraggedItemId(null);
-    }
+
+const isColumnInsideExpandedGate = (gate, x) =>
+  gate.w > 1          
+  && x > gate.x        
+  && x < gate.x + gate.w;
+
+const handleDragStop = (newLayout) => {
+  if (!draggedItemId) {
+    console.error('Dragged item ID is missing on drag stop!');
+    return;
+  }
+
+
+  const updatedLayout = newLayout
+    .filter(item => item.i !== '__dropping-elem__' && item.y < gridDimenY)
+    .map(item => ({
+      ...item,
+      gateId: layout.find(i => i.i === item.i)?.gateId,
+    }));
+
+  const illegalMove = updatedLayout.some(item =>
+    updatedLayout.some(gate =>
+      gate.i !== item.i && isColumnInsideExpandedGate(gate, item.x)
+    )
+  );
+
+  if (illegalMove) {
+
+    setDraggedItemId(null);
+    return;
+  }
+
+
+  setLayout(updatedLayout);
+  setDraggedItemId(null);
+};
+
 
     return (
         <div className='relative bg-white border-2 border-gray-200 m-2 shadow-lg rounded-lg'
